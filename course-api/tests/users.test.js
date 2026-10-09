@@ -37,3 +37,35 @@ test('PUT /users/:id returns 404 for a missing user', async () => {
   const res = await request(app).put('/users/999').send({ name: 'Nobody' });
   assert.equal(res.status, 404);
 });
+
+test('POST /users returns 400 when name or email is not a string', async () => {
+  const res = await request(app)
+    .post('/users')
+    .send({ name: 123, email: { a: 1 } });
+  assert.equal(res.status, 400);
+  assert.ok(res.body.error);
+  assert.equal(store.listUsers().length, 2);
+});
+
+test('PUT /users/:id returns 400 and leaves the user unchanged for invalid values', async () => {
+  for (const body of [{ name: null }, { name: '' }, { email: 42 }]) {
+    const res = await request(app).put('/users/1').send(body);
+    assert.equal(res.status, 400);
+    assert.ok(res.body.error);
+  }
+  assert.deepEqual(store.getUser(1), {
+    id: 1,
+    name: 'Ada Lovelace',
+    email: 'ada@example.com',
+  });
+});
+
+test('malformed JSON returns a 400 JSON error', async () => {
+  const res = await request(app)
+    .post('/users')
+    .set('Content-Type', 'application/json')
+    .send('{bad');
+  assert.equal(res.status, 400);
+  assert.match(res.headers['content-type'], /application\/json/);
+  assert.equal(res.body.error, 'Malformed JSON body');
+});
