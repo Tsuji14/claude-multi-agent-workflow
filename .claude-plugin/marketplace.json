@@ -1,0 +1,14 @@
+{
+  "name": "fumi-plugins",
+  "description": "Code-quality plugins for Claude Code.",
+  "owner": {
+    "name": "Fumi"
+  },
+  "plugins": [
+    {
+      "name": "code-quality",
+      "source": "./",
+      "description": "Review, fix, and test a codebase with a multi-agent workflow, plus a lint-on-edit hook."
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "code-quality",
+  "version": "1.0.0",
+  "description": "Review, fix, and test a codebase with a multi-agent workflow, plus a lint-on-edit hook.",
+  "author": {
+    "name": "Fumi"
+  }
+}
