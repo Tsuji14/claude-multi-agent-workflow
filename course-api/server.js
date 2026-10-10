@@ -8,13 +8,26 @@ app.use(express.json());
 app.use('/health', healthRouter);
 app.use('/users', usersRouter);
 
+// Unknown routes get a JSON 404 instead of Express's default HTML page.
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
 // Keep error responses in the documented `{ "error": "message" }` shape,
 // including body-parser failures such as malformed JSON.
 app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'Malformed JSON body' });
   }
-  const status = err.status || err.statusCode || 500;
+  // Only trust error statuses that are valid 4xx/5xx codes.
+  const candidate = err.status || err.statusCode;
+  const status =
+    Number.isInteger(candidate) && candidate >= 400 && candidate <= 599
+      ? candidate
+      : 500;
   if (status >= 500) {
     console.error(err);
   }
